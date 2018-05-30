@@ -17,22 +17,123 @@ library(tidyverse)
 
 ##### Examples 
 
+```{r eval=FALSE}
+read_csv("a,b,c
+1,2,3
+4,5,6")
+```
+```{r eval = FALSE}
+ read_csv("The first line of metadata
+          The second line of metadata
+          x,y,z
+          1,2,3", skip = 2)
+```
+```{r eval = FALSE}
+ read_csv("# A comment I want to skip
+          x,y,z
+1,2,3", comment = "#")
+```
+```{r eval = FALSE}
+read_csv("1,2,3\n4,5,6", col_names = FALSE)
+```
+```{r eval = FALSE}
+read_csv("a,b,c\n1,2,.", na = ".")
+```
+
+
+
+
 ##### Exercises
 
 1. What function would you use to read a file where fields are separated with “|”?
 2. Apart from file, skip, and comment, what other arguments do `read_csv()` and `read_tsv()` have in common?
 3. What are the most important arguments to `read_fwf()`?
 4. Sometimes strings in a CSV file contain commas. To prevent them from causing problems they need to be surrounded by a quoting character, like " or '. By convention, read_csv() assumes that the quoting character will be ", and if you want to change it you’ll need to use `read_delim()` instead. What arguments do you need to specify to read the following text into a data frame?
-"x,y\n1,'a,b'"
+        "x,y\n1,'a,b'"
 5. Identify what is wrong with each of the following inline CSV files. What happens when you run the code?
-`read_csv("a,b\n1,2,3\n4,5,6")`
-`read_csv("a,b,c\n1,2\n1,2,3,4")`
-`read_csv("a,b\n\"1")`
-`read_csv("a,b\n1,2\na,b")`
-`read_csv("a;b\n1;3")`
+        `read_csv("a,b\n1,2,3\n4,5,6")`
+        `read_csv("a,b,c\n1,2\n1,2,3,4")`
+        `read_csv("a,b\n\"1")`
+        `read_csv("a,b\n1,2\na,b")`
+        `read_csv("a;b\n1;3")`
 
 #### Parsing a vector
+
 ##### Examples 
+
+```{r eval = FALSE}
+str(parse_logical(c("TRUE", "FALSE", "NA")))
+str(parse_integer(c("1", "2", "3")))
+str(parse_date(c("2010-01-01", "1979-10-14"))) 
+```
+
+```{r eval = FALSE}
+parse_integer(c("1", "231", ".", "456"), na = ".")
+x <- parse_integer(c("123", "345", "abc", "123.45"))
+x
+problems(x)
+```
+
+```{r eval = FALSE}
+parse_double("1.23")
+parse_double("1,23", locale = locale(decimal_mark = ","))
+```
+```{r eval = FALSE}
+parse_number("$100")
+parse_number("20%")
+parse_number("It cost $123.45")
+```
+
+```{r eval = FALSE}
+# Used in America
+parse_number("$123,456,789") 
+
+# Used in many parts of Europe
+parse_number(
+      "123.456.789",
+      locale = locale(grouping_mark = ".")
+)
+# Used in Switzerland
+parse_number(
+      "123'456'789",
+      locale = locale(grouping_mark = "'")
+)
+```
+```{r eval = FALSE}
+charToRaw("Rladies MCR")
+```
+
+```{r eval = FALSE}
+x1 <- "El Ni\xf1o was particularly bad this year"
+x2 <- "\x82\xb1\x82\xf1\x82\xc9\x82\xbf\x82\xcd"
+
+
+parse_character(x1, locale = locale(encoding = "Latin1"))
+parse_character(x2, locale = locale(encoding = "Shift-JIS")) 
+```
+```{r eval = FALSE}
+fruit <- c("apple", "banana")
+parse_factor(c("apple", "banana", "bananana"), levels = fruit)
+```
+```{r eval = FALSE}
+parse_datetime("2010-10-01T2010")
+```
+```{r eval = FALSE}
+# If time is omitted, it will be set to midnight
+parse_datetime("20101010")
+```
+```{r eval = FALSE}
+library(hms)
+parse_time("01:10 am")
+parse_time("20:10:01")
+```
+
+```{r eval = FALSE}
+parse_date("01/02/15", "%m/%d/%y")
+parse_date("01/02/15", "%d/%m/%y")
+parse_date("01/02/15", "%y/%m/%d")
+
+```
 
 ##### Exercises
 1. What are the most important arguments to `locale()`? 
@@ -42,54 +143,182 @@ library(tidyverse)
 5. What’s the difference between `read_csv()` and `read_csv2()`?
 6. What are the most common encodings used in Europe? What are the most common encodings used in Asia? Do some goo‐ gling to find out.
 7. Generate the correct format string to parse each of the following dates and times:
-  d1 <- "January 1, 2010"
+d1 <- "January 1, 2010"
 d2 <- "2015-Mar-07"
 d3 <- "06-Jun-2017"
 d4 <- c("August 19 (2015)", "July 1 (2015)") d5 <- "12/30/14" # Dec 30, 2014
-t1 <- "1705"
-t2 <- "11:15:10.12 PM"
+        t1 <- "1705"
+        t2 <- "11:15:10.12 PM"
+        
+#### Parsing a File
+##### Exercise
+
+Strategy 1
+
+```{r eval = FALSE}
+challenge <- read_csv(readr_example("challenge.csv"))
+```
+```{r eval = FALSE}
+problems(challenge)
+```
+```{r eval = FALSE}
+ challenge <- read_csv(
+      readr_example("challenge.csv"),
+      col_types = cols(
+        x = col_integer(),
+        y = col_character()
+      )
+)
+```
+```{r eval = FALSE}
+challenge <- read_csv(
+      readr_example("challenge.csv"),
+      col_types = cols(
+        x = col_double(),
+        y = col_character()
+      )
+)
+
+```
+```{r eval = FALSE}
+tail(challenge)
+```
+
+```{r eval = FALSE}
+ challenge <- read_csv(
+      readr_example("challenge.csv"),
+      col_types = cols(
+        x = col_double(),
+        y = col_date()))
+```
+
+```{r eval = FALSE}
+tail(challenge)
+```
+
+Strategy 2
+
+```{r eval = FALSE}
+challenge2 <- read_csv(
+                        readr_example("challenge.csv"),
+                        guess_max = 1001
+                      )
+```
+
+```{r eval = FALSE}
+challenge2 <- read_csv(readr_example("challenge.csv"),
+        col_types = cols(.default = col_character())
+)
+```
 
 #### Writing to a File 
 ##### Examples 
 
-##### Exercises
-#### Other Types of data 
-##### Examples 
 
-##### Exercises
+```{r eval = FALSE}
+challenge 
+write_csv(challenge, "challenge-2.csv") 
+read_csv("challenge-2.csv")
+```
+
+```{r eval = FALSE}
+write_rds(challenge, "challenge.rds") 
+read_rds("challenge.rds")
+```
+
+```{r eval = FALSE}
+library(feather)
+write_feather(challenge, "challenge.feather")
+read_feather("challenge.feather")
+```
+
 ### Chapter 7 - Tibbles with tibble ... 
-##### Examples 
 
-##### Exercises
 #### Creating tibbles
 ##### Examples 
+```{r eval = FALSE}
+as_tibble(iris)
+```
+```{r eval = FALSE}
+tibble( x=1:5,
+y=1,
+z=x^2+y )
+```
+```{r eval = FALSE}
+tb <- tibble(
+      `:)` = "smile",
+      ` ` = "space",
+      `2000` = "number"
+)
+tb
+```
 
-##### Exercises
 #### Tibbles Versus data.frame 
 ##### Examples 
+Printing
+```{r eval = FALSE}
+tibble(
+a = lubridate::now() + runif(1e3) * 86400, b = lubridate::today() + runif(1e3) * 30, c = 1:1e3,
+d = runif(1e3),
+e = sample(letters, 1e3, replace = TRUE)
+)
+```
 
-##### Exercises
+Subsetting
+
+```{r eval=FALSE, include=TRUE}
+df <- tibble(
+      x = runif(5),
+      y = rnorm(5)
+)
+df
+df$x
+    # Extract by position
+df[[1]]
+```
+
+```{r eval=FALSE, include=TRUE}
+library(datasets)
+austres <- as.tibble(austres)
+```
+
+```{r eval=FALSE, include=TRUE}
+austres %>% print(n = 10, width = Inf)
+```
+```{r eval=FALSE, include=TRUE}
+austres %>% View()
+```
+
+```{r eval=FALSE, include=TRUE}
+df %>% .$x
+df %>% .[["x"]]
+```
+
 #### Interacting with Older Code 
 ##### Examples 
+```{r eval = FALSE}
+class(as.data.frame(tb))
+```
+
 
 ##### Exercises
 
 1. How can you tell if an object is a tibble? (Hint: try printing mtcars, which is a regular data frame.)
 2. Compare and contrast the following operations on a data.frame and equivalent tibble. What is different? Why might the default data frame behaviors cause you frustration?
-`df <- data.frame(abc = 1, xyz = "a")`
-`df$x`
-`df[, "xyz"]`
-`df[, c("abc", "xyz")]`
+       `df <- data.frame(abc = 1, xyz = "a")`
+       `df$x`
+       `df[, "xyz"]`
+       `df[, c("abc", "xyz")]`
 3. If you have the name of a variable stored in an object, e.g., var <- "mpg", how can you extract the reference variable from a tib‐ ble?
 4. Practice referring to nonsyntactic names in the following data frame by:
-  a. Extracting the variable called 1.
+a. Extracting the variable called 1.
 b. Plotting a scatterplot of 1 versus 2.
 c. Creating a new column called 3, which is 2 divided by 1.
 d. Renaming the columns to one, two, and three:
-  annoying <- tibble(
-    `1` = 1:10,
-    `2` = `1` * 2 + rnorm(length(`1`))
-  )
+          annoying <- tibble(
+            `1` = 1:10,
+            `2` = `1` * 2 + rnorm(length(`1`))
+)
 5. What does tibble::enframe() do? When might you use it?
 6. What option controls how many additional column names are
 printed at the footer of a tibble?
