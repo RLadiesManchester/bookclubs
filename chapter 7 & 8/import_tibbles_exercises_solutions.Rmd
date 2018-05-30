@@ -263,16 +263,10 @@ d = runif(1e3),
 e = sample(letters, 1e3, replace = TRUE)
 )
 ```
-```{r}
-as.tibble(datasets::austres) %>% print(n = 10, width = Inf)
-```
-```{r}
-as.tibble(datasets::austres) %>%
-      View()
-```
 
 Subsetting
-```{r}
+
+```{r eval=FALSE, include=TRUE}
 df <- tibble(
       x = runif(5),
       y = rnorm(5)
@@ -282,7 +276,20 @@ df$x
     # Extract by position
 df[[1]]
 ```
-```{r}
+
+```{r eval=FALSE, include=TRUE}
+library(datasets)
+austres <- as.tibble(austres)
+```
+
+```{r eval=FALSE, include=TRUE}
+austres %>% print(n = 10, width = Inf)
+```
+```{r eval=FALSE, include=TRUE}
+austres %>% View()
+```
+
+```{r eval=FALSE, include=TRUE}
 df %>% .$x
 df %>% .[["x"]]
 ```
